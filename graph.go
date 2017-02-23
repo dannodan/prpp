@@ -219,6 +219,7 @@ func swapNRemoveEdge(remove int, edges *[]edge) {
 }
 
 func (g *Graph) bfs(n *node, finishList *[]Node) {
+	totalBenefit := 0
 	queue := make([]*node, 0, len(n.edges))
 	queue = append(queue, n)
 	for i := 0; i < len(queue); i++ {
@@ -227,10 +228,12 @@ func (g *Graph) bfs(n *node, finishList *[]Node) {
 		for _, edge := range node.edges {
 			if edge.end.state == unseen {
 				edge.end.state = seen
+				totalBenefit = totalBenefit + edge.benefit - edge.cost
 				queue = append(queue, edge.end)
 			}
 		}
 	}
+	fmt.Println(totalBenefit)
 	*finishList = make([]Node, 0, len(queue))
 	for i := range queue {
 		*finishList = append(*finishList, queue[i].container)
@@ -247,6 +250,7 @@ func (g *Graph) ConnectedComponents() [][]Node {
 			components = append(components, component)
 		}
 	}
+	fmt.Println(len(components))
 	return components
 }
 

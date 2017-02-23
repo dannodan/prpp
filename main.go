@@ -51,17 +51,30 @@ func main() {
 			}
 			fmt.Println(len(g.nodes))
 		}
-		fmt.Println(contents)
-		if _, err := strconv.Atoi(contents[0]); err == nil {
-			startNode, _ := strconv.ParseInt(contents[0], 0, 0)
-			endNode, _ := strconv.ParseInt(contents[1], 0, 0)
-			cost, _ := strconv.ParseInt(contents[2], 0, 0)
-			benefit, _ := strconv.ParseInt(contents[3], 0, 0)
-			g.MakeEdge(nodes[int(startNode)], nodes[int(endNode)], int(cost), int(benefit))
+		if line > 1 {
+			if _, err = strconv.Atoi(contents[0]); err == nil {
+				startNode, _ := strconv.ParseInt(contents[0], 0, 0)
+				endNode, _ := strconv.ParseInt(contents[1], 0, 0)
+				cost, _ := strconv.ParseInt(contents[2], 0, 0)
+				benefit, _ := strconv.ParseInt(contents[3], 0, 0)
+				g.MakeEdge(nodes[int(startNode)], nodes[int(endNode)], int(cost), int(benefit))
+			} else {
+				fmt.Println("kek?")
+				break
+			}
 		}
+		// fmt.Println(contents)
+		// if _, err := strconv.Atoi(contents[0]); err == nil {
+		// 	startNode, _ := strconv.ParseInt(contents[0], 0, 0)
+		// 	endNode, _ := strconv.ParseInt(contents[1], 0, 0)
+		// 	cost, _ := strconv.ParseInt(contents[2], 0, 0)
+		// 	benefit, _ := strconv.ParseInt(contents[3], 0, 0)
+		// 	g.MakeEdge(nodes[int(startNode)], nodes[int(endNode)], int(cost), int(benefit))
+		// }
 		line++
 	}
-	g.ConnectedComponentOfNode(nodes[1].node)
-	fmt.Println(nodes[1])
-	check(err)
+	g.ConnectedComponents()
+	// g.ConnectedComponentOfNode(nodes[1].node)
+	// fmt.Println(nodes[1])
+	// check(err)
 }
