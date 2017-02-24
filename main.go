@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	// "github.com/twmb/algoimpl/go/graph"
 	"strings"
@@ -20,6 +21,7 @@ func main() {
 
 	g := NewGraph()
 	nodes := make(map[int]Node, 0)
+	sortedEdges := Edges{}
 	// nodes[0] = g.MakeNode()
 	// nodes[1] = g.MakeNode()
 	// nodes[2] = g.MakeNode()
@@ -39,7 +41,7 @@ func main() {
 	// g.MakeEdge(nodes[3], nodes[5], 9, 1)
 	// g.MakeEdge(nodes[4], nodes[5], 8, 1)
 
-	file, err := os.Open("./ALBAIDAANoRPP")
+	file, _ := os.Open("./ALBAIDAANoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	for lineScanner.Scan() {
@@ -49,30 +51,33 @@ func main() {
 			for i := 1; i < int(number+1); i++ {
 				nodes[i] = g.MakeNode()
 			}
-			fmt.Println(len(g.nodes))
 		}
-		if line > 1 {
-			if _, err = strconv.Atoi(contents[0]); err == nil {
-				startNode, _ := strconv.ParseInt(contents[0], 0, 0)
-				endNode, _ := strconv.ParseInt(contents[1], 0, 0)
-				cost, _ := strconv.ParseInt(contents[2], 0, 0)
-				benefit, _ := strconv.ParseInt(contents[3], 0, 0)
-				g.MakeEdge(nodes[int(startNode)], nodes[int(endNode)], int(cost), int(benefit))
-			} else {
-				fmt.Println("kek?")
-				break
-			}
-		}
-		// fmt.Println(contents)
-		// if _, err := strconv.Atoi(contents[0]); err == nil {
-		// 	startNode, _ := strconv.ParseInt(contents[0], 0, 0)
-		// 	endNode, _ := strconv.ParseInt(contents[1], 0, 0)
-		// 	cost, _ := strconv.ParseInt(contents[2], 0, 0)
-		// 	benefit, _ := strconv.ParseInt(contents[3], 0, 0)
-		// 	g.MakeEdge(nodes[int(startNode)], nodes[int(endNode)], int(cost), int(benefit))
+		// if line > 1 {
+		// 	if _, err = strconv.Atoi(contents[0]); err == nil {
+		// 		startNode, _ := strconv.ParseInt(contents[0], 0, 0)
+		// 		endNode, _ := strconv.ParseInt(contents[1], 0, 0)
+		// 		cost, _ := strconv.ParseInt(contents[2], 0, 0)
+		// 		benefit, _ := strconv.ParseInt(contents[3], 0, 0)
+		// 		g.MakeEdge(nodes[int(startNode)], nodes[int(endNode)], int(cost), int(benefit))
+		// 	} else {
+		// 		fmt.Println("kek?")
+		// 		break
+		// 	}
 		// }
+		// fmt.Println(contents)
+		if _, err := strconv.Atoi(contents[0]); err == nil {
+			startNode, _ := strconv.ParseInt(contents[0], 0, 0)
+			endNode, _ := strconv.ParseInt(contents[1], 0, 0)
+			cost, _ := strconv.ParseInt(contents[2], 0, 0)
+			benefit, _ := strconv.ParseInt(contents[3], 0, 0)
+			newEdge := Edge{int(cost), int(benefit), nodes[int(startNode)], nodes[int(endNode)]}
+			sortedEdges = append(sortedEdges, newEdge)
+		}
 		line++
 	}
+	sort.Sort(sort.Reverse(sortedEdges))
+	// fmt.Println(sortedEdges)
+	g.GraphBuilder(sortedEdges)
 	g.ConnectedComponents()
 	// g.ConnectedComponentOfNode(nodes[1].node)
 	// fmt.Println(nodes[1])

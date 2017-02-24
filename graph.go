@@ -28,6 +28,7 @@ type node struct {
 	reversedEdges []edge
 	index         int
 	state         int   // used for metadata
+	incidence     int   // used for incidence
 	data          int   // also used for metadata
 	parent        *node // also used for metadata
 	container     Node  // who holds me
@@ -53,6 +54,7 @@ type Node struct {
 type edge struct {
 	cost    int
 	benefit int
+	state   int
 	end     *node
 }
 
@@ -66,6 +68,20 @@ type Edge struct {
 	End     Node
 }
 
+type Edges []Edge
+
+func (slice Edges) Len() int {
+	return len(slice)
+}
+
+func (slice Edges) Less(i, j int) bool {
+	return (float64(slice[i].Benefit) / float64(slice[i].Cost)) < (float64(slice[j].Benefit) / float64(slice[j].Cost))
+}
+
+func (slice Edges) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
+}
+
 // NewGraph creates and returns an empty graph.
 // This function returns an undirected graph by default.
 func NewGraph() *Graph {
@@ -75,7 +91,7 @@ func NewGraph() *Graph {
 
 // MakeNode creates a node, adds it to the graph and returns the new node.
 func (g *Graph) MakeNode() Node {
-	newNode := &node{index: len(g.nodes)}
+	newNode := &node{index: len(g.nodes), incidence: 0}
 	newNode.container = Node{node: newNode, Value: new(interface{})}
 	g.nodes = append(g.nodes, newNode)
 	return newNode.container
@@ -144,23 +160,23 @@ func (g *Graph) MakeEdge(from, to Node, cost, benefit int) error {
 		return errors.New("Second node in MakeEdge call does not belong to this graph")
 	}
 
-	for i := range from.node.edges { // check if edge already exists
-		if from.node.edges[i].end == to.node {
-			from.node.edges[i].cost = cost
-			from.node.edges[i].benefit = benefit
-
-			// If the graph is undirected, fix the to node's cost as well
-			if to != from {
-				for j := range to.node.edges {
-					if to.node.edges[j].end == from.node {
-						to.node.edges[j].cost = cost
-						to.node.edges[i].benefit = benefit
-					}
-				}
-			}
-			return nil
-		}
-	}
+	// for i := range from.node.edges { // check if edge already exists
+	// 	if from.node.edges[i].end == to.node {
+	// 		from.node.edges[i].cost = cost
+	// 		from.node.edges[i].benefit = benefit
+	//
+	// 		// If the graph is undirected, fix the to node's cost as well
+	// 		if to != from {
+	// 			for j := range to.node.edges {
+	// 				if to.node.edges[j].end == from.node {
+	// 					to.node.edges[j].cost = cost
+	// 					to.node.edges[i].benefit = benefit
+	// 				}
+	// 			}
+	// 		}
+	// 		return nil
+	// 	}
+	// }
 	newEdge := edge{cost: cost, benefit: benefit, end: to.node}
 	from.node.edges = append(from.node.edges, newEdge)
 	reversedEdge := edge{cost: cost, benefit: benefit, end: from.node} // cost for undirected graph only
@@ -258,6 +274,36 @@ func (g *Graph) ConnectedComponents() [][]Node {
 func (g *Graph) ConnectedComponentOfNode(node *node) []Node {
 	component := make([]Node, 0)
 	g.bfs(node, &component)
-	fmt.Println(component)
+	fmt.Println(len(component))
 	return component
+}
+
+func (g *Graph) GraphBuilder(edges Edges) {
+	totalEdges := len(edges)
+	for _, edge := range edges {
+		if edge.Benefit-2*edge.Cost >= 0 {
+			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
+			g.MakeEdge(edge.Start, edge.End, edge.Cost, 0)
+			edge.Start.node.incidence = edge.Start.node.incidence + 2
+			edge.End.node.incidence = edge.End.node.incidence + 2
+			edges = edges[1:]
+			totalEdges--
+		} else if edge.Benefit-edge.Cost >= 0 {
+			// } else {
+			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
+			edge.Start.node.incidence = edge.Start.node.incidence + 1
+			edge.End.node.incidence = edge.End.node.incidence + 1
+			edges = edges[1:]
+			totalEdges--
+			// }
+		} else if edge.Start.node.incidence%2 != 0 && edge.End.node.incidence%2 != 0 {
+			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
+			edge.Start.node.incidence = edge.Start.node.incidence + 1
+			edge.End.node.incidence = edge.End.node.incidence + 1
+			// edges = append(edges[:totalEdges-index], edges[totalEdges-index+1:]...)
+			totalEdges--
+		}
+	}
+	fmt.Println(len(edges))
+	fmt.Println(totalEdges)
 }
