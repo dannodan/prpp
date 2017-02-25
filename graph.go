@@ -256,6 +256,40 @@ func (g *Graph) bfs(n *node, finishList *[]Node) {
 	}
 }
 
+func (g *Graph) bfsMap(n *node, finishList map[int]Node) map[int]Node {
+	queue := make([]*node, 0, len(n.edges))
+	queue = append(queue, n)
+	for i := 0; i < len(queue); i++ {
+		node := queue[i]
+		node.state = seen
+		for _, edge := range node.edges {
+			if edge.end.state == unseen {
+				edge.end.state = seen
+				queue = append(queue, edge.end)
+			}
+		}
+	}
+	finishList = make(map[int]Node, len(queue))
+	for i := range queue {
+		// fmt.Println(queue[i].index)
+		finishList[queue[i].index] = queue[i].container
+	}
+	return finishList
+}
+
+func (g *Graph) ConnectedComponentsMap() []map[int]Node {
+	componentMap := make([]map[int]Node, 0)
+	for _, node := range g.nodes {
+		if node.state == unseen {
+			component := make(map[int]Node, 0)
+			component = g.bfsMap(node, component)
+			componentMap = append(componentMap, component)
+		}
+	}
+	// fmt.Println(componentMap)
+	return componentMap
+}
+
 // ConnectedComponents algorithm for an undirected graph
 func (g *Graph) ConnectedComponents() [][]Node {
 	components := make([][]Node, 0)
@@ -278,6 +312,26 @@ func (g *Graph) ConnectedComponentOfNode(node *node) []Node {
 	return component
 }
 
+func (g *Graph) LinkComponents(edges Edges) {
+	// linkedComponents := make([]map[int]Node, 0)
+	linkedComponents := g.ConnectedComponentsMap()
+	// fmt.Println(g)
+	// fmt.Println(linkedComponents)
+	for _, edge := range edges {
+		// fmt.Println(edge)
+		for _, component := range linkedComponents {
+			first := component[edge.Start.node.index]
+			second := component[edge.End.node.index]
+			if (first == Node{}) || (second == Node{}) {
+				// fmt.Println("Do Nothing")
+			} else {
+				g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
+				// fmt.Println("Nodo Agregado")
+			}
+		}
+	}
+}
+
 func (g *Graph) GraphBuilder(edges Edges) {
 	totalEdges := len(edges)
 	for _, edge := range edges {
@@ -295,15 +349,16 @@ func (g *Graph) GraphBuilder(edges Edges) {
 			edge.End.node.incidence = edge.End.node.incidence + 1
 			edges = edges[1:]
 			totalEdges--
-			// }
-		} else if edge.Start.node.incidence%2 != 0 && edge.End.node.incidence%2 != 0 {
-			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
-			edge.Start.node.incidence = edge.Start.node.incidence + 1
-			edge.End.node.incidence = edge.End.node.incidence + 1
-			// edges = append(edges[:totalEdges-index], edges[totalEdges-index+1:]...)
-			totalEdges--
 		}
+		// } else if edge.Start.node.incidence%2 != 0 && edge.End.node.incidence%2 != 0 {
+		// 	g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
+		// 	edge.Start.node.incidence = edge.Start.node.incidence + 1
+		// 	edge.End.node.incidence = edge.End.node.incidence + 1
+		// 	// edges = append(edges[:totalEdges-index], edges[totalEdges-index+1:]...)
+		// 	totalEdges--
+		// }
 	}
-	fmt.Println(len(edges))
-	fmt.Println(totalEdges)
+	g.LinkComponents(edges)
+	// fmt.Println(len(edges))
+	// fmt.Println(totalEdges)
 }

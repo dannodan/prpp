@@ -71,6 +71,7 @@ func main() {
 			cost, _ := strconv.ParseInt(contents[2], 0, 0)
 			benefit, _ := strconv.ParseInt(contents[3], 0, 0)
 			newEdge := Edge{int(cost), int(benefit), nodes[int(startNode)], nodes[int(endNode)]}
+			// fmt.Println(newEdge)
 			sortedEdges = append(sortedEdges, newEdge)
 		}
 		line++
@@ -78,7 +79,7 @@ func main() {
 	sort.Sort(sort.Reverse(sortedEdges))
 	// fmt.Println(sortedEdges)
 	g.GraphBuilder(sortedEdges)
-	g.ConnectedComponents()
+	// g.ConnectedComponentsMap()
 	// g.ConnectedComponentOfNode(nodes[1].node)
 	// fmt.Println(nodes[1])
 	// check(err)
