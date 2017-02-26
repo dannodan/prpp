@@ -194,8 +194,10 @@ func (g *Graph) RemoveEdge(from, to Node) {
 	toReversedEdges := to.node.reversedEdges
 	for e := range fromEdges { // fix from->to
 		if fromEdges[e].end == to.node {
+			fmt.Println(fromEdges[e])
 			swapNRemoveEdge(e, &fromEdges)
 			from.node.edges = fromEdges
+			// fmt.Println("erased")
 			break
 		}
 	}
@@ -230,6 +232,7 @@ func (g *Graph) Neighbors(n Node) []Node {
 
 // Swaps an edge to the end of the edges slice and 'removes' it by reslicing.
 func swapNRemoveEdge(remove int, edges *[]edge) {
+	fmt.Println(edges)
 	(*edges)[remove], (*edges)[len(*edges)-1] = (*edges)[len(*edges)-1], (*edges)[remove]
 	*edges = (*edges)[:len(*edges)-1]
 }
@@ -249,7 +252,7 @@ func (g *Graph) bfs(n *node, finishList *[]Node) {
 			}
 		}
 	}
-	fmt.Println(totalBenefit)
+	// fmt.Println(totalBenefit)
 	*finishList = make([]Node, 0, len(queue))
 	for i := range queue {
 		*finishList = append(*finishList, queue[i].container)
@@ -308,7 +311,7 @@ func (g *Graph) ConnectedComponents() [][]Node {
 func (g *Graph) ConnectedComponentOfNode(node *node) []Node {
 	component := make([]Node, 0)
 	g.bfs(node, &component)
-	fmt.Println(len(component))
+	fmt.Println(component)
 	return component
 }
 
@@ -316,20 +319,23 @@ func (g *Graph) LinkComponents(edges Edges) {
 	// linkedComponents := make([]map[int]Node, 0)
 	linkedComponents := g.ConnectedComponentsMap()
 	// fmt.Println(g)
-	// fmt.Println(linkedComponents)
+	fmt.Println(linkedComponents)
 	for _, edge := range edges {
 		// fmt.Println(edge)
 		for _, component := range linkedComponents {
 			first := component[edge.Start.node.index]
 			second := component[edge.End.node.index]
-			if (first == Node{}) || (second == Node{}) {
+			if ((first != Node{}) && (second != Node{})) || ((first == Node{}) && (second == Node{})) {
 				// fmt.Println("Do Nothing")
 			} else {
+				// fmt.Println(first.node.index)
+				// fmt.Println(second.node.index)
 				g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
 				// fmt.Println("Nodo Agregado")
 			}
 		}
 	}
+	// g.unseeNodes()
 }
 
 func (g *Graph) GraphBuilder(edges Edges) {
@@ -359,6 +365,59 @@ func (g *Graph) GraphBuilder(edges Edges) {
 		// }
 	}
 	g.LinkComponents(edges)
+	// g.unseeNodes()
+	// g.ConnectedComponents()
 	// fmt.Println(len(edges))
 	// fmt.Println(totalEdges)
 }
+
+func (g *Graph) unseeNodes() {
+	for _, node := range g.nodes {
+		node.state = unseen
+	}
+}
+
+func (g *Graph) checkIncidence() {
+	totalNodes := 0
+	for _, node := range g.nodes {
+		if node.incidence%2 != 0 {
+			totalNodes++
+		}
+	}
+	fmt.Println(totalNodes)
+}
+
+//
+// func (g *Graph) makeEven(edges Edges) {
+// 	for _, edge := range edges {
+// 		if (edge.Start.node.incidence%2 != 0) && (edge.End.node.incidence%2 != 0) {
+// 			fmt.Println("Check Incidence")
+// 			if (edge.Start.node.incidence > 2) || (edge.End.node.incidence > 2) {
+// 				fmt.Println("Removing")
+// 				g.RemoveEdge(edge.Start, edge.End)
+// 				edge.Start.node.incidence = edge.Start.node.incidence - 1
+// 				edge.End.node.incidence = edge.End.node.incidence - 1
+// 			}
+// 			// if edge.Start.node.incidence == 1 || edge.End.node.incidence == 1 {
+// 			// 	g.RemoveNode(&edge.Start)
+// 			// }
+// 			// if  {
+// 			// 	g.RemoveNode(&edge.Start)
+// 			// }
+// 		}
+// 	}
+// }
+
+// func (g *Graph) GetPath(fromNode *node, path []int) []int {
+// 	sort.Sort(sort.Reverse(fromNode.edges))
+// 	for i := 1; i < len(fromNode); i++ {
+// 		if fromNode.edges[i-1].state > fromNode.edges[i].state{
+// 			break
+// 		}
+//
+// 	}
+// 	fromNode.edges[0].state++
+// 	path = append(path, fromNode.index+1)
+//
+// 	path = append(path, g.GetPath(fromNode))
+// }

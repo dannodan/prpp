@@ -80,7 +80,11 @@ func main() {
 	// fmt.Println(sortedEdges)
 	g.GraphBuilder(sortedEdges)
 	// g.ConnectedComponentsMap()
+	g.unseeNodes()
+	g.checkIncidence()
+	// sort.Reverse(sortedEdges)
 	// g.ConnectedComponentOfNode(nodes[1].node)
+	// g.ConnectedComponents()
 	// fmt.Println(nodes[1])
 	// check(err)
 }
