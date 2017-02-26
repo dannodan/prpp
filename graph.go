@@ -10,6 +10,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math"
 )
 
 const (
@@ -79,6 +80,20 @@ func (slice Edges) Less(i, j int) bool {
 }
 
 func (slice Edges) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
+}
+
+type edges []edge
+
+func (slice edges) Len() int {
+	return len(slice)
+}
+
+func (slice edges) Less(i, j int) bool {
+	return (float64(slice[i].benefit) / float64(slice[i].cost)) < (float64(slice[j].benefit) / float64(slice[j].cost))
+}
+
+func (slice edges) Swap(i, j int) {
 	slice[i], slice[j] = slice[j], slice[i]
 }
 
@@ -344,8 +359,8 @@ func (g *Graph) GraphBuilder(edges Edges) {
 		if edge.Benefit-2*edge.Cost >= 0 {
 			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
 			g.MakeEdge(edge.Start, edge.End, edge.Cost, 0)
-			edge.Start.node.incidence = edge.Start.node.incidence + 2
-			edge.End.node.incidence = edge.End.node.incidence + 2
+			edge.Start.node.incidence = edge.Start.node.incidence + 1
+			edge.End.node.incidence = edge.End.node.incidence + 1
 			edges = edges[1:]
 			totalEdges--
 		} else if edge.Benefit-edge.Cost >= 0 {
@@ -355,20 +370,25 @@ func (g *Graph) GraphBuilder(edges Edges) {
 			edge.End.node.incidence = edge.End.node.incidence + 1
 			edges = edges[1:]
 			totalEdges--
+			// }
+		} else if edge.Start.node.incidence%2 != 0 && edge.End.node.incidence%2 != 0 {
+			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
+			edge.Start.node.incidence = edge.Start.node.incidence + 1
+			edge.End.node.incidence = edge.End.node.incidence + 1
+			totalEdges--
 		}
-		// } else if edge.Start.node.incidence%2 != 0 && edge.End.node.incidence%2 != 0 {
-		// 	g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
-		// 	edge.Start.node.incidence = edge.Start.node.incidence + 1
-		// 	edge.End.node.incidence = edge.End.node.incidence + 1
-		// 	// edges = append(edges[:totalEdges-index], edges[totalEdges-index+1:]...)
-		// 	totalEdges--
-		// }
 	}
-	g.LinkComponents(edges)
-	// g.unseeNodes()
-	// g.ConnectedComponents()
-	// fmt.Println(len(edges))
-	// fmt.Println(totalEdges)
+}
+
+func (g *Graph) PositiveGraphBuilder(edges Edges) {
+	for _, edge := range edges {
+		if edge.Benefit-edge.Cost >= 0 {
+			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
+			edge.Start.node.incidence = edge.Start.node.incidence + 1
+			edge.End.node.incidence = edge.End.node.incidence + 1
+			edges = edges[1:]
+		}
+	}
 }
 
 func (g *Graph) unseeNodes() {
@@ -421,3 +441,85 @@ func (g *Graph) checkIncidence() {
 //
 // 	path = append(path, g.GetPath(fromNode))
 // }
+
+func (g *Graph) EulerianCycle(start Node) (tour []int, success bool) {
+	// For an Eulerian cirtuit all the vertices has to have a even degree
+	unvisitedEdges := make(map[Node]map[Node]int, 0)
+	for _, node := range g.nodes {
+		if node.incidence%2 != 0 {
+			return nil, false
+		}
+		unvisitedEdges[node.container] = make(map[Node]int, 0)
+		for _, edge := range node.edges {
+			unvisitedEdges[node.container][edge.end.container] = edge.benefit - edge.cost
+		}
+	}
+	fmt.Println(unvisitedEdges)
+	// Hierholzer's algorithm
+	var currentNode, nextNode Node
+	//
+	valueStack := []int{}
+	value := 0
+	tour = []int{}
+	stack := []Node{start}
+	for len(stack) > 0 {
+		currentNode = stack[len(stack)-1]
+		// Get an arbitrary edge from the current vertex
+		// 	edgesSeen := 0
+		if len(unvisitedEdges[currentNode]) > 0 {
+			for nextNode = range unvisitedEdges[currentNode] {
+				break
+			}
+			// fmt.Println(unvisitedEdges[currentNode][nextNode])
+			valueStack = append(valueStack, unvisitedEdges[currentNode][nextNode])
+			delete(unvisitedEdges[currentNode], nextNode)
+			delete(unvisitedEdges[nextNode], currentNode)
+			stack = append(stack, nextNode)
+			fmt.Println(valueStack[len(valueStack)-1])
+		} else {
+			// fmt.Println(len(valueStack))
+			tour = append(tour, stack[len(stack)-1].node.index+1)
+			// fmt.Println(value)
+			stack = stack[:len(stack)-1]
+		}
+	}
+	for index := range valueStack {
+		value = value + valueStack[index]
+		// valueStack = valueStack[:len(stack)-1]
+	}
+	fmt.Println(value)
+	return tour, true
+}
+
+func (g *Graph) Degree(n Node) int {
+	return len(n.node.edges)
+}
+
+func (g *Graph) FloydWarshall() [][]int {
+	path := make([][]int, len(g.nodes))
+	// Build Distance Matrix
+	lenNodes := len(g.nodes)
+	for i := 0; i < lenNodes; i++ {
+		path[i] = make([]int, lenNodes)
+		for j := 0; j < lenNodes; j++ {
+			path[i][j] = math.MaxInt32
+		}
+		path[i][i] = 0
+		for _, edge := range g.nodes[i].edges {
+			path[i][edge.end.index] = edge.cost
+		}
+	}
+
+	// Floyd Warshall Algorithm
+	for k := 0; k < lenNodes; k++ {
+		for i := 0; i < lenNodes; i++ {
+			for j := 0; j < lenNodes; j++ {
+				dt := path[i][k] + path[k][j]
+				if path[i][j] > dt {
+					path[i][j] = dt
+				}
+			}
+		}
+	}
+	return path
+}
