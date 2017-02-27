@@ -181,34 +181,15 @@ func (g *Graph) MakeEdge(from, to Node, cost, benefit int) error {
 		return errors.New("First node in MakeEdge call does not belong to this graph")
 	}
 	if to.node == nil || to.node.index >= len(g.nodes) || g.nodes[to.node.index] != to.node {
-		// fmt.Println("Error MakeEdge")
 		return errors.New("Second node in MakeEdge call does not belong to this graph")
 	}
 
-	// for i := range from.node.edges { // check if edge already exists
-	// 	if from.node.edges[i].end == to.node {
-	// 		from.node.edges[i].cost = cost
-	// 		from.node.edges[i].benefit = benefit
-	//
-	// 		// If the graph is undirected, fix the to node's cost as well
-	// 		if to != from {
-	// 			for j := range to.node.edges {
-	// 				if to.node.edges[j].end == from.node {
-	// 					to.node.edges[j].cost = cost
-	// 					to.node.edges[i].benefit = benefit
-	// 				}
-	// 			}
-	// 		}
-	// 		return nil
-	// 	}
-	// }
 	newEdge := edge{cost: cost, benefit: benefit, end: to.node}
 	from.node.edges = append(from.node.edges, newEdge)
 	reversedEdge := edge{cost: cost, benefit: benefit, end: from.node} // cost for undirected graph only
 	if to != from {
 		to.node.edges = append(to.node.edges, reversedEdge)
 	}
-	// fmt.Println("Lado Creado")
 	return nil
 }
 
@@ -220,10 +201,8 @@ func (g *Graph) RemoveEdge(from, to Node) {
 	toReversedEdges := to.node.reversedEdges
 	for e := range fromEdges { // fix from->to
 		if fromEdges[e].end == to.node {
-			fmt.Println(fromEdges[e])
 			swapNRemoveEdge(e, &fromEdges)
 			from.node.edges = fromEdges
-			// fmt.Println("erased")
 			break
 		}
 	}
@@ -258,7 +237,6 @@ func (g *Graph) Neighbors(n Node) []Node {
 
 // Swaps an edge to the end of the edges slice and 'removes' it by reslicing.
 func swapNRemoveEdge(remove int, edges *[]edge) {
-	fmt.Println(edges)
 	(*edges)[remove], (*edges)[len(*edges)-1] = (*edges)[len(*edges)-1], (*edges)[remove]
 	*edges = (*edges)[:len(*edges)-1]
 }
@@ -278,7 +256,6 @@ func (g *Graph) bfs(n *node, finishList *[]Node) {
 			}
 		}
 	}
-	// fmt.Println(totalBenefit)
 	*finishList = make([]Node, 0, len(queue))
 	for i := range queue {
 		*finishList = append(*finishList, queue[i].container)
@@ -300,7 +277,6 @@ func (g *Graph) bfsMap(n *node, finishList map[int]Node) map[int]Node {
 	}
 	finishList = make(map[int]Node, len(queue))
 	for i := range queue {
-		// fmt.Println(queue[i].index)
 		finishList[queue[i].index] = queue[i].container
 	}
 	return finishList
@@ -315,7 +291,6 @@ func (g *Graph) ConnectedComponentsMap() []map[int]Node {
 			componentMap = append(componentMap, component)
 		}
 	}
-	// fmt.Println(componentMap)
 	return componentMap
 }
 
@@ -329,7 +304,6 @@ func (g *Graph) ConnectedComponents() [][]Node {
 			components = append(components, component)
 		}
 	}
-	fmt.Println(len(components))
 	return components
 }
 
@@ -337,7 +311,6 @@ func (g *Graph) ConnectedComponents() [][]Node {
 func (g *Graph) ConnectedComponentOfNode(node *node) []Node {
 	component := make([]Node, 0)
 	g.bfs(node, &component)
-	fmt.Println(component)
 	return component
 }
 
@@ -345,31 +318,23 @@ func (g *Graph) LinkComponents(edges Edges) {
 	// linkedComponents := make([]map[int]Node, 0)
 	linkedComponents := g.ConnectedComponentsMap()
 	g.unseeNodes()
-	// fmt.Println(g)
-	//fmt.Println(linkedComponents)
 	for _, edge := range edges {
-		// fmt.Println(edge)
 		for _, component := range linkedComponents {
 			first := component[edge.Start.node.index]
 			second := component[edge.End.node.index]
 			if ((first != Node{}) && (second != Node{})) || ((first == Node{}) && (second == Node{})) {
-				// fmt.Println("Do Nothing")
+
 			} else {
-				// fmt.Println(first.node.index)
-				// fmt.Println(second.node.index)
 				g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
-				// fmt.Println("Nodo Agregado")
 				break
 			}
 		}
 		linkedComponents = g.ConnectedComponentsMap()
 		g.unseeNodes()
-		//fmt.Println(g)
 	}
 }
 
 func (g *Graph) GraphBuilder(edges Edges) {
-	//fmt.Println(edges)
 	for _, edge := range edges {
 		g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
 		edge.Start.node.incidence = edge.Start.node.incidence + 1
@@ -378,7 +343,6 @@ func (g *Graph) GraphBuilder(edges Edges) {
 }
 
 func (g *Graph) PositiveGraphBuilder(edges Edges) {
-	//fmt.Println(edges)
 	for _, edge := range edges {
 		if edge.Benefit-edge.Cost >= 0 {
 			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
@@ -401,44 +365,7 @@ func (g *Graph) checkIncidence() {
 			totalNodes++
 		}
 	}
-	// fmt.Println(totalNodes)
 }
-
-// func (g *Graph) GetPath(fromNode Node) []int {
-// 	path := []int{}
-// 	edgeList := make(map[Node]map[Node]edge, 0)
-// 	for _, node := range g.nodes {
-// 		edgeList[node.container] = make(map[Node]edge, 0)
-// 		for _, edge := range node.edges {
-// 			edgeList[node.container][edge.end.container] = edge
-// 		}
-// 	}
-// 	chosenEdge := 0
-// 	costIndex := float64(0)
-// 	for index, edge := range fromNode.node.edges {
-// 		test := float64(edgeList[fromNode][edge.end.container].benefit) / float64(edgeList[fromNode][edge.end.container].cost)
-// 		if (test > costIndex) && edge.state <= fromNode.node.edges[chosenEdge].state {
-// 			fmt.Println(edge.state)
-// 			costIndex = test
-// 			chosenEdge = index
-// 			// fmt.Println("test")
-// 			// fmt.Println(chosenEdge)
-// 		}
-// 	}
-// 	fmt.Println("test")
-// 	edgeList[fromNode][fromNode.node.edges[chosenEdge].end.container].state = edgeList[fromNode][fromNode.node.edges[chosenEdge].end.container].state + 1
-// 	// edgeList[fromNode][fromNode.node.edges[chosenEdge].end.container]
-// 	fmt.Println(fromNode.node.edges[chosenEdge].state)
-// 	if fromNode.node.edges[chosenEdge].end == g.nodes[0] {
-// 		path = append(path, 1)
-// 		fmt.Println(path)
-// 	} else {
-// 		path = g.GetPath(fromNode.node.edges[chosenEdge].end.container)
-// 		path = append(path, fromNode.node.edges[chosenEdge].end.index)
-// 		fmt.Println(path)
-// 	}
-// 	return path
-// }
 
 func (g *Graph) EulerianCycle(start Node) (tour []int, success bool, value int) {
 	// For an Eulerian cirtuit all the vertices has to have a even degree
@@ -457,7 +384,6 @@ func (g *Graph) EulerianCycle(start Node) (tour []int, success bool, value int) 
 			unvisitedEdges[node.container][edge.end.container] = edge.benefit - edge.cost
 		}
 	}
-	fmt.Println(unvisitedEdges)
 	// Hierholzer's algorithm
 	var currentNode, nextNode Node
 	//
@@ -469,31 +395,20 @@ func (g *Graph) EulerianCycle(start Node) (tour []int, success bool, value int) 
 		currentNode = stack[len(stack)-1]
 		// Get an arbitrary edge from the current vertex
 		// 	edgesSeen := 0
-		// fmt.Println(unvisitedEdges[currentNode])
-		// fmt.Println(len(unvisitedEdges[currentNode]))
 		if len(unvisitedEdges[currentNode]) > 0 {
 			for nextNode = range unvisitedEdges[currentNode] {
 				break
 			}
-			// fmt.Println(unvisitedEdges[currentNode][nextNode])
 			valueStack = append(valueStack, unvisitedEdges[currentNode][nextNode])
 			value = value + unvisitedEdges[currentNode][nextNode]
 			delete(unvisitedEdges[currentNode], nextNode)
 			delete(unvisitedEdges[nextNode], currentNode)
 			stack = append(stack, nextNode)
-			fmt.Println(valueStack[len(valueStack)-1])
 		} else {
-			// fmt.Println(len(valueStack))
 			tour = append(tour, stack[len(stack)-1].node.index+1)
-			// fmt.Println(value)
 			stack = stack[:len(stack)-1]
 		}
 	}
-	// for index := range valueStack {
-	// 	value = value + valueStack[index]
-	// 	// valueStack = valueStack[:len(stack)-1]
-	// }
-	fmt.Println(value)
 	return tour, true, value
 }
 
