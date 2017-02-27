@@ -1,0 +1,25 @@
+﻿Proyecto 1 
+Diseño de Algoritmos I CI-5651
+Autores: Jonnathan Ng
+         Daniel Rodriguez
+
+Instrucciones: 
+
+Para compilar es necesario tener instalado el paquete o compilador de Golang. 
+Este se puede conseguir instalar desde la pagina https://golang.org/dl/. Una vez 
+instalado puede proceder la compilación y ejecución del programa.
+
+Compilacion:
+Debe situarse dentro de la carpeta del proyecto, entonces ejecute:
+
+go build main.go graph.go
+
+Esto generara un ejecutable llamado main.exe en Windows o main para
+sistemas UNIX
+
+Ejecucion:
+Para la ejecucion debe situarse dentro del lugar donde tenga el ejecutable
+creado, entonces ejecute el comando
+
+./main <nombre_archivo> <valor_optimo_sol> en UNIX
+main.exe <nombre_archivo> <valor_optimo_sol>  en Windows

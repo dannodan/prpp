@@ -22,7 +22,7 @@ func check(e error) {
 
 func main() {
 	if len(os.Args) <= 2{
-		fmt.Println("Para ejecutar escriba ./main <nombre-archivo> <valor-optimo>")
+		fmt.Println("Para ejecutar ./main <nombre-archivo> <valor-optimo>")
 		return
 	}
 
@@ -167,6 +167,8 @@ func main() {
 
 
 	elapsed := time.Since(beginning)
+	fmt.Println()
+	fmt.Println(args[1])
 	fmt.Println("Tiempo de ejecucion: ",elapsed)
 	fmt.Println("Valor Optimo: ",optimum)
 	fmt.Println("Valor Heurística: ",value)
