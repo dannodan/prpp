@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"time"
 	// "github.com/twmb/algoimpl/go/graph"
 	"strings"
 
@@ -20,7 +21,7 @@ func check(e error) {
 }
 
 func main() {
-	fmt.Println("Hello World")
+	beginning := time.Now()
 
 	g := NewGraph()
 	positiveG := NewGraph()
@@ -48,6 +49,7 @@ func main() {
 	// g.MakeEdge(nodes[4], nodes[5], 8, 1)
 	args := os.Args
 	file, _ := os.Open(args[1])
+	optimum, _ := strconv.ParseInt(args[3], 0, 0)
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	for lineScanner.Scan() {
@@ -185,4 +187,12 @@ func main() {
 	_, err = salida.WriteString(result)
 	check(err)
 	salida.Sync()
+
+	optimumDeviation := float64(100 * ((int(optimum)) - value) / int(optimum))
+
+	fmt.Println(optimum)
+
+	elapsed := time.Since(beginning)
+	fmt.Println(elapsed)
+	fmt.Println(optimumDeviation)
 }
