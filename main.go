@@ -74,10 +74,10 @@ func main() {
 	sort.Sort(sort.Reverse(sortedEdges))
 	// fmt.Println(sortedEdges)
 	g.GraphBuilder(sortedEdges)
-	positiveG.PositiveGraphBuilder(sortedEdges)
+	// positiveG.PositiveGraphBuilder(sortedEdges)
 	// g.ConnectedComponentsMap()
 	g.unseeNodes()
-	g.checkIncidence()
+	// g.checkIncidence()
 	// sort.Reverse(sortedEdges)
 	eulerPath, _ := g.EulerianCycle(nodes[1])
 	fmt.Println(eulerPath)
@@ -86,30 +86,93 @@ func main() {
 	// fmt.Println(nodes[1])
 	// check(err)
 
+	fmt.Println(positiveG.ConnectedComponents())
+
 	// Get Floyd Warshall for the complete Graph
-	minPath := g.FloydWarshall()
+	minCost, minPath := g.FloydWarshall()
+	fmt.Println("FW matrix: ", minCost)
 
 	// W need to connect Connected Componentes and get oddNodes
 
 	// Get oddNodes
-	oddNodes := make([]int, 0)
+	oddNodes := make([]int, 0) // List of OddNodes
 	for index, elem := range pNodes {
 		if positiveG.Degree(elem)%2 != 0 {
 			oddNodes = append(oddNodes, index)
 		}
 	}
 
+	fmt.Println()
+	fmt.Println("Imprimiendo grafo positivo Original")
+	fmt.Println(positiveG)
+
+	// Compute minimum Matching using Munkres Algorithm
 	// Munkres, convert matrix to single vector Munkres Algorithm for OddNodes
 	size := len(oddNodes)
 	m := mk.NewMatrix(size)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
-			m.A[i*size+j] = int64(minPath[oddNodes[i]-1][oddNodes[j]-1])
+			m.A[i*size+j] = int64(minCost[oddNodes[i]-1][oddNodes[j]-1])
 		}
 		m.A[i*size+i] = math.MaxInt32 // Set infinite to the same Vertice
 	}
-	fmt.Println("FW matrix: ", minPath)
-	fmt.Println(m.A)
-	fmt.Println(mk.ComputeMunkresMin(m)) // [{0 3} {1 1} {2 0} {3 2}]
 
+	minMatching := mk.ComputeMunkresMin(m)
+	newMinMatching := []mk.RowCol{}
+	fmt.Println(m.A)
+	minMatchMap := make(map[int]map[int]int)
+	for _, elem := range minMatching {
+		minMatchMap[oddNodes[elem.Start()]] = make(map[int]int)
+		for _ = range positiveG.nodes[elem.Start()].edges {
+			minMatchMap[oddNodes[elem.Start()]][oddNodes[elem.End()]] = 1
+		}
+		fmt.Print("(", oddNodes[elem.Start()], ",", oddNodes[elem.End()], "), ")
+	}
+	for _, elem := range minMatching {
+		if minMatchMap[elem.End()][elem.Start()] != 0 {
+			minMatchMap[elem.End()][elem.Start()] = 0
+		}
+	}
+	for _, elem := range minMatching {
+		if minMatchMap[elem.Start()][elem.Start()] != 0 {
+			newMinMatching = append(newMinMatching, elem)
+		}
+	}
+
+	fmt.Println()
+	// Insert Path from Munkres algorithm
+	for _, elem := range newMinMatching {
+		startIndex := oddNodes[elem.Start()]
+		start := nodes[startIndex].node
+		fmt.Println(oddNodes[elem.Start()])
+		path := ReconstructPath(minPath, oddNodes[elem.Start()]-1, oddNodes[elem.End()]-1)
+		for _, vertice := range path {
+			nextIndex := vertice + 1
+			next := nodes[nextIndex].node
+			for _, edge := range start.edges {
+				if edge.end == next {
+					// fmt.Printf("Agregando Arista: (%d,%d)\n", startIndex, vertice+1)
+					// fmt.Println(startIndex-1)
+					// fmt.Println(pNodes[startIndex])
+					// fmt.Println(nextIndex)
+					// fmt.Println(pNodes[nextIndex])
+					// positiveG.checkEdges(pNodes[startIndex], pNodes[nextIndex], edge.cost, edge.benefit)
+					positiveG.MakeEdge(pNodes[startIndex], pNodes[nextIndex], edge.cost, edge.benefit)
+					break
+				}
+			}
+			start = next
+			startIndex = nextIndex
+
+		}
+	}
+
+	// fmt.Println(positiveG.ConnectedComponentOfNode(nodes[1].node))
+	// positiveG.checkIncidence()
+	// fmt.Println()
+	// fmt.Println("Imprimiendo grafo positivo nuevo")
+	// fmt.Println(positiveG)
+	eulerPath, _ = positiveG.EulerianCycle(nodes[1])
+	fmt.Println(eulerPath)
+	// check(err)
 }

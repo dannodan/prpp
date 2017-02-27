@@ -83,18 +83,26 @@ func (slice Edges) Swap(i, j int) {
 	slice[i], slice[j] = slice[j], slice[i]
 }
 
-type edges []edge
-
-func (slice edges) Len() int {
-	return len(slice)
+// To String Function
+func (n Node) String() string {
+	return fmt.Sprintf("%d", *n.Value)
 }
 
-func (slice edges) Less(i, j int) bool {
-	return (float64(slice[i].benefit) / float64(slice[i].cost)) < (float64(slice[j].benefit) / float64(slice[j].cost))
+func (n *node) String() string {
+	ed := fmt.Sprintf("%d -> [", *n.container.Value)
+	for _, edge := range n.edges {
+		ed = ed + fmt.Sprintf("(%d,%d)", *n.container.Value, *edge.end.container.Value)
+	}
+	ed = ed + "]"
+	return ed
 }
 
-func (slice edges) Swap(i, j int) {
-	slice[i], slice[j] = slice[j], slice[i]
+func (g Graph) String() string {
+	nodes := ""
+	for _, node := range g.nodes {
+		nodes = nodes + node.String() + "\n"
+	}
+	return nodes
 }
 
 // NewGraph creates and returns an empty graph.
@@ -350,7 +358,7 @@ func (g *Graph) LinkComponents(edges Edges) {
 			}
 		}
 	}
-	// g.unseeNodes()
+	g.unseeNodes()
 }
 
 func (g *Graph) GraphBuilder(edges Edges) {
@@ -358,7 +366,7 @@ func (g *Graph) GraphBuilder(edges Edges) {
 	for _, edge := range edges {
 		if edge.Benefit-2*edge.Cost >= 0 {
 			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
-			g.MakeEdge(edge.Start, edge.End, edge.Cost, 0)
+			// g.MakeEdge(edge.Start, edge.End, edge.Cost, 0)
 			edge.Start.node.incidence = edge.Start.node.incidence + 1
 			edge.End.node.incidence = edge.End.node.incidence + 1
 			edges = edges[1:]
@@ -407,34 +415,26 @@ func (g *Graph) checkIncidence() {
 	fmt.Println(totalNodes)
 }
 
+// func (g *Graph) GetPath(fromNode Node) []int {
 //
-// func (g *Graph) makeEven(edges Edges) {
-// 	for _, edge := range edges {
-// 		if (edge.Start.node.incidence%2 != 0) && (edge.End.node.incidence%2 != 0) {
-// 			fmt.Println("Check Incidence")
-// 			if (edge.Start.node.incidence > 2) || (edge.End.node.incidence > 2) {
-// 				fmt.Println("Removing")
-// 				g.RemoveEdge(edge.Start, edge.End)
-// 				edge.Start.node.incidence = edge.Start.node.incidence - 1
-// 				edge.End.node.incidence = edge.End.node.incidence - 1
-// 			}
-// 			// if edge.Start.node.incidence == 1 || edge.End.node.incidence == 1 {
-// 			// 	g.RemoveNode(&edge.Start)
-// 			// }
-// 			// if  {
-// 			// 	g.RemoveNode(&edge.Start)
-// 			// }
+// 	edgeList := make(map[Node]map[Node]edge, 0)
+// 	for _, node := range g.nodes {
+// 		edgeList[node] = make(map[Node]int, 0)
+// 		for _, edge := range node.edges {
+// 			edgeList[node][edge.end.container] = edge
 // 		}
 // 	}
-// }
-
-// func (g *Graph) GetPath(fromNode *node, path []int) []int {
-// 	sort.Sort(sort.Reverse(fromNode.edges))
+// 	for _, edge := range fromNode.edges {
+// 		newIndex := (float64(edge.benefit) / float64(edge.cost))
+// 		if (newIndex > costIndex) && edge.state <= chosenEdge.state {
+// 			costIndex = newIndex
+// 			chosenEdge = edge
+// 		}
+// 	}
 // 	for i := 1; i < len(fromNode); i++ {
-// 		if fromNode.edges[i-1].state > fromNode.edges[i].state{
+// 		if fromNode.edges[i-1].state > fromNode.edges[i].state {
 // 			break
 // 		}
-//
 // 	}
 // 	fromNode.edges[0].state++
 // 	path = append(path, fromNode.index+1)
@@ -444,6 +444,11 @@ func (g *Graph) checkIncidence() {
 
 func (g *Graph) EulerianCycle(start Node) (tour []int, success bool) {
 	// For an Eulerian cirtuit all the vertices has to have a even degree
+	if start.node.incidence < 2 {
+		fmt.Println(start.node.edges[0].end.container)
+		g.MakeEdge(start, start.node.edges[0].end.container, start.node.edges[0].cost, 0)
+		start.node.incidence++
+	}
 	unvisitedEdges := make(map[Node]map[Node]int, 0)
 	for _, node := range g.nodes {
 		if node.incidence%2 != 0 {
@@ -495,21 +500,24 @@ func (g *Graph) Degree(n Node) int {
 	return len(n.node.edges)
 }
 
-func (g *Graph) FloydWarshall() [][]int {
+func (g *Graph) FloydWarshall() (mincost, minpath [][]int) {
 	path := make([][]int, len(g.nodes))
+	next := make([][]int, len(g.nodes))
 	// Build Distance Matrix
 	lenNodes := len(g.nodes)
 	for i := 0; i < lenNodes; i++ {
 		path[i] = make([]int, lenNodes)
+		next[i] = make([]int, lenNodes)
 		for j := 0; j < lenNodes; j++ {
 			path[i][j] = math.MaxInt32
+			next[i][j] = -1
 		}
 		path[i][i] = 0
 		for _, edge := range g.nodes[i].edges {
 			path[i][edge.end.index] = edge.cost
+			next[i][edge.end.index] = edge.end.index
 		}
 	}
-
 	// Floyd Warshall Algorithm
 	for k := 0; k < lenNodes; k++ {
 		for i := 0; i < lenNodes; i++ {
@@ -517,9 +525,22 @@ func (g *Graph) FloydWarshall() [][]int {
 				dt := path[i][k] + path[k][j]
 				if path[i][j] > dt {
 					path[i][j] = dt
+					next[i][j] = next[i][k]
 				}
 			}
 		}
+	}
+	return path, next
+}
+
+func ReconstructPath(next [][]int, u, v int) []int {
+	if next[u][v] == -1 {
+		return nil
+	}
+	path := make([]int, 0)
+	for u != v {
+		u = next[u][v]
+		path = append(path, u)
 	}
 	return path
 }
