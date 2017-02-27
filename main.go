@@ -81,12 +81,12 @@ func main() {
 	// fmt.Println(sortedEdges)
 	g.GraphBuilder(sortedEdges)
 	positiveG.PositiveGraphBuilder(sortedPositiveEdges)
-	fmt.Println("Grafo Original: \n",g)
-	fmt.Println("Grafo Nodos Positivos: \n",positiveG)
+	fmt.Println("Grafo Original: \n", g)
+	fmt.Println("Grafo Nodos Positivos: \n", positiveG)
 	// fmt.Println(positiveG)
 	positiveG.unseeNodes()
 	positiveG.LinkComponents(sortedPositiveEdges)
-	fmt.Println("Grafo Nodos Positivos Conectado: \n",positiveG)
+	fmt.Println("Grafo Nodos Positivos Conectado: \n", positiveG)
 	// g.checkIncidence()
 	// eulerPath, _ := g.EulerianCycle(nodes[1])
 	// fmt.Println(eulerPath)
@@ -139,21 +139,26 @@ func main() {
 		minMatchMap[oddNodes[elem.Start()]] = make(map[int]int)
 		for _ = range positiveG.nodes[elem.Start()].edges {
 			minMatchMap[oddNodes[elem.Start()]][oddNodes[elem.End()]] = 1
+			// fmt.Println(minMatchMap)
 		}
-		fmt.Print("(", oddNodes[elem.Start()], ",", oddNodes[elem.End()], "), ")
+		fmt.Print("(", oddNodes[elem.Start()], ",", oddNodes[elem.End()], "), \n")
 	}
 	for _, elem := range minMatching {
-		if minMatchMap[elem.End()][elem.Start()] != 0 {
-			minMatchMap[elem.End()][elem.Start()] = 0
+		// fmt.Println(minMatchMap[oddNodes[elem.End()]][oddNodes[elem.Start()]])
+		if minMatchMap[oddNodes[elem.End()]][oddNodes[elem.Start()]] != 0 {
+			minMatchMap[oddNodes[elem.Start()]][oddNodes[elem.End()]] = 0
+			// fmt.Println(minMatchMap[oddNodes[elem.End()]][oddNodes[elem.Start()]])
 		}
 	}
+	// fmt.Println("MinMatchMap: ", minMatchMap)
 	for _, elem := range minMatching {
-		if minMatchMap[elem.Start()][elem.Start()] != 0 {
+		if minMatchMap[oddNodes[elem.Start()]][oddNodes[elem.End()]] != 0 {
 			newMinMatching = append(newMinMatching, elem)
+			// fmt.Println("newMinMatching: ", newMinMatching)
 		}
 	}
 	fmt.Println()
-	fmt.Println("newMinMatching: ",newMinMatching)
+	fmt.Println("newMinMatching: ", newMinMatching)
 	// Insert Path from Munkres algorithm
 	for _, elem := range newMinMatching {
 		startIndex := oddNodes[elem.Start()]
