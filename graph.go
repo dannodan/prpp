@@ -440,7 +440,7 @@ func (g *Graph) checkIncidence() {
 // 	return path
 // }
 
-func (g *Graph) EulerianCycle(start Node) (tour []int, success bool) {
+func (g *Graph) EulerianCycle(start Node) (tour []int, success bool, value int) {
 	// For an Eulerian cirtuit all the vertices has to have a even degree
 	// if start.node.incidence < 2 {
 	// 	fmt.Println(start.node.edges[0].end.container)
@@ -450,7 +450,7 @@ func (g *Graph) EulerianCycle(start Node) (tour []int, success bool) {
 	unvisitedEdges := make(map[Node]map[Node]int, 0)
 	for _, node := range g.nodes {
 		if len(node.edges)%2 != 0 {
-			return nil, false
+			return nil, false, 0
 		}
 		unvisitedEdges[node.container] = make(map[Node]int, 0)
 		for _, edge := range node.edges {
@@ -462,7 +462,7 @@ func (g *Graph) EulerianCycle(start Node) (tour []int, success bool) {
 	var currentNode, nextNode Node
 	//
 	valueStack := []int{}
-	value := 0
+	value = 0
 	tour = []int{}
 	stack := []Node{start}
 	for len(stack) > 0 {
@@ -477,6 +477,7 @@ func (g *Graph) EulerianCycle(start Node) (tour []int, success bool) {
 			}
 			// fmt.Println(unvisitedEdges[currentNode][nextNode])
 			valueStack = append(valueStack, unvisitedEdges[currentNode][nextNode])
+			value = value + unvisitedEdges[currentNode][nextNode]
 			delete(unvisitedEdges[currentNode], nextNode)
 			delete(unvisitedEdges[nextNode], currentNode)
 			stack = append(stack, nextNode)
@@ -488,12 +489,12 @@ func (g *Graph) EulerianCycle(start Node) (tour []int, success bool) {
 			stack = stack[:len(stack)-1]
 		}
 	}
-	for index := range valueStack {
-		value = value + valueStack[index]
-		// valueStack = valueStack[:len(stack)-1]
-	}
+	// for index := range valueStack {
+	// 	value = value + valueStack[index]
+	// 	// valueStack = valueStack[:len(stack)-1]
+	// }
 	fmt.Println(value)
-	return tour, true
+	return tour, true, value
 }
 
 func (g *Graph) Degree(n Node) int {

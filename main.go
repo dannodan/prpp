@@ -46,8 +46,8 @@ func main() {
 	// g.MakeEdge(nodes[3], nodes[4], 2, 8)
 	// g.MakeEdge(nodes[3], nodes[5], 9, 1)
 	// g.MakeEdge(nodes[4], nodes[5], 8, 1)
-
-	file, _ := os.Open("./P01NoRPP")
+	args := os.Args
+	file, _ := os.Open(args[1])
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	for lineScanner.Scan() {
@@ -165,6 +165,24 @@ func main() {
 	}
 	fmt.Println("Imprimiendo grafo positivo nuevo con todos los nodos pares")
 	fmt.Println(positiveG)
-	eulerPath, _ := positiveG.EulerianCycle(pNodes[1])
+	eulerPath, _, value := positiveG.EulerianCycle(pNodes[1])
 	fmt.Println(eulerPath)
+	salida, err := os.Create(args[2] + "-salida.txt")
+	check(err)
+	defer salida.Close()
+	stringValue := strconv.Itoa(value)
+	stringPath := []string{}
+	_, err = salida.WriteString(stringValue)
+	check(err)
+	_, err = salida.WriteString("\n")
+	check(err)
+	for i := range eulerPath {
+		number := eulerPath[len(eulerPath)-i-1]
+		text := strconv.Itoa(number)
+		stringPath = append(stringPath, text)
+	}
+	result := strings.Join(stringPath, " ")
+	_, err = salida.WriteString(result)
+	check(err)
+	salida.Sync()
 }
