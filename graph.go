@@ -442,14 +442,14 @@ func (g *Graph) checkIncidence() {
 
 func (g *Graph) EulerianCycle(start Node) (tour []int, success bool) {
 	// For an Eulerian cirtuit all the vertices has to have a even degree
-	if start.node.incidence < 2 {
-		fmt.Println(start.node.edges[0].end.container)
-		g.MakeEdge(start, start.node.edges[0].end.container, start.node.edges[0].cost, 0)
-		start.node.incidence++
-	}
+	// if start.node.incidence < 2 {
+	// 	fmt.Println(start.node.edges[0].end.container)
+	// 	g.MakeEdge(start, start.node.edges[0].end.container, start.node.edges[0].cost, 0)
+	// 	start.node.incidence++
+	// }
 	unvisitedEdges := make(map[Node]map[Node]int, 0)
 	for _, node := range g.nodes {
-		if node.incidence%2 != 0 {
+		if len(node.edges)%2 != 0 {
 			return nil, false
 		}
 		unvisitedEdges[node.container] = make(map[Node]int, 0)
@@ -469,6 +469,8 @@ func (g *Graph) EulerianCycle(start Node) (tour []int, success bool) {
 		currentNode = stack[len(stack)-1]
 		// Get an arbitrary edge from the current vertex
 		// 	edgesSeen := 0
+		// fmt.Println(unvisitedEdges[currentNode])
+		// fmt.Println(len(unvisitedEdges[currentNode]))
 		if len(unvisitedEdges[currentNode]) > 0 {
 			for nextNode = range unvisitedEdges[currentNode] {
 				break
