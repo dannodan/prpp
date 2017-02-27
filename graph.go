@@ -369,36 +369,11 @@ func (g *Graph) LinkComponents(edges Edges) {
 }
 
 func (g *Graph) GraphBuilder(edges Edges) {
-	// fmt.Println("WAT")
-	// fmt.Println(len(edges))
-	totalEdges := len(edges)
 	for _, edge := range edges {
-		if edge.Benefit-2*edge.Cost >= 0 {
-			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
-			// g.MakeEdge(edge.Start, edge.End, edge.Cost, 0)
-			// fmt.Println(edge.Start)
-			edge.Start.node.incidence = edge.Start.node.incidence + 1
-			edge.End.node.incidence = edge.End.node.incidence + 1
-			edges = edges[1:]
-			totalEdges--
-		} else if edge.Benefit-edge.Cost >= 0 {
-			// } else {
-			// fmt.Println(edge.Start)
-			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
-			edge.Start.node.incidence = edge.Start.node.incidence + 1
-			edge.End.node.incidence = edge.End.node.incidence + 1
-			edges = edges[1:]
-			totalEdges--
-			// }
-		} else if edge.Start.node.incidence%2 != 0 && edge.End.node.incidence%2 != 0 {
-			// fmt.Println(edge.Start)
-			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
-			edge.Start.node.incidence = edge.Start.node.incidence + 1
-			edge.End.node.incidence = edge.End.node.incidence + 1
-			totalEdges--
-		}
+		g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
+		edge.Start.node.incidence = edge.Start.node.incidence + 1
+		edge.End.node.incidence = edge.End.node.incidence + 1
 	}
-	// fmt.Println(g)
 }
 
 func (g *Graph) PositiveGraphBuilder(edges Edges) {
