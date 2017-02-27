@@ -47,7 +47,7 @@ func main() {
 	// g.MakeEdge(nodes[3], nodes[5], 9, 1)
 	// g.MakeEdge(nodes[4], nodes[5], 8, 1)
 
-	file, _ := os.Open("./test")
+	file, _ := os.Open("./P01NoRPP")
 	lineScanner := bufio.NewScanner(file)
 	line := 0
 	for lineScanner.Scan() {
@@ -77,17 +77,16 @@ func main() {
 		line++
 	}
 
-	sort.Sort(sort.Reverse(sortedEdges))
 	sort.Sort(sort.Reverse(sortedPositiveEdges))
 	// fmt.Println(sortedEdges)
 	g.GraphBuilder(sortedEdges)
 	positiveG.PositiveGraphBuilder(sortedPositiveEdges)
-	fmt.Println(g)
-	fmt.Println(positiveG)
+	fmt.Println("Grafo Original: \n",g)
+	fmt.Println("Grafo Nodos Positivos: \n",positiveG)
 	// fmt.Println(positiveG)
-	positiveG.ConnectedComponentsMap()
 	positiveG.unseeNodes()
 	positiveG.LinkComponents(sortedPositiveEdges)
+	fmt.Println("Grafo Nodos Positivos Conectado: \n",positiveG)
 	// g.checkIncidence()
 	// eulerPath, _ := g.EulerianCycle(nodes[1])
 	// fmt.Println(eulerPath)
@@ -104,16 +103,14 @@ func main() {
 	// fmt.Println(path)
 	//
 	// Get Floyd Warshall for the complete Graph
-	minCost, minPath := positiveG.FloydWarshall()
-	fmt.Println("FW matrix: ", minCost)
+	minCost, minPath := g.FloydWarshall()
+	//fmt.Println("FW matrix: ", minCost)
 
 	// W need to connect Connected Componentes and get oddNodes
 
 	// positiveG.LinkComponents(sortedEdges)
 
 	positiveG.unseeNodes()
-
-	fmt.Println(positiveG.ConnectedComponents())
 
 	// Get oddNodes
 	oddNodes := make([]int, 0) // List of OddNodes
@@ -122,10 +119,6 @@ func main() {
 			oddNodes = append(oddNodes, index)
 		}
 	}
-
-	fmt.Println()
-	fmt.Println("Imprimiendo grafo positivo Original")
-	fmt.Println(positiveG)
 
 	// Compute minimum Matching using Munkres Algorithm
 	// Munkres, convert matrix to single vector Munkres Algorithm for OddNodes
@@ -140,8 +133,8 @@ func main() {
 
 	minMatching := mk.ComputeMunkresMin(m)
 	newMinMatching := []mk.RowCol{}
-	fmt.Println(m.A)
 	minMatchMap := make(map[int]map[int]int)
+	fmt.Println("Pares a conectar: ")
 	for _, elem := range minMatching {
 		minMatchMap[oddNodes[elem.Start()]] = make(map[int]int)
 		for _ = range positiveG.nodes[elem.Start()].edges {
@@ -159,8 +152,8 @@ func main() {
 			newMinMatching = append(newMinMatching, elem)
 		}
 	}
-
 	fmt.Println()
+	fmt.Println("newMinMatching: ",newMinMatching)
 	// Insert Path from Munkres algorithm
 	for _, elem := range newMinMatching {
 		startIndex := oddNodes[elem.Start()]

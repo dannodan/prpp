@@ -346,7 +346,7 @@ func (g *Graph) LinkComponents(edges Edges) {
 	linkedComponents := g.ConnectedComponentsMap()
 	g.unseeNodes()
 	// fmt.Println(g)
-	fmt.Println(linkedComponents)
+	//fmt.Println(linkedComponents)
 	for _, edge := range edges {
 		// fmt.Println(edge)
 		for _, component := range linkedComponents {
@@ -364,12 +364,12 @@ func (g *Graph) LinkComponents(edges Edges) {
 		}
 		linkedComponents = g.ConnectedComponentsMap()
 		g.unseeNodes()
-		fmt.Println(g)
+		//fmt.Println(g)
 	}
 }
 
 func (g *Graph) GraphBuilder(edges Edges) {
-	fmt.Println(edges)
+	//fmt.Println(edges)
 	for _, edge := range edges {
 		g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
 		edge.Start.node.incidence = edge.Start.node.incidence + 1
@@ -378,7 +378,7 @@ func (g *Graph) GraphBuilder(edges Edges) {
 }
 
 func (g *Graph) PositiveGraphBuilder(edges Edges) {
-	fmt.Println(edges)
+	//fmt.Println(edges)
 	for _, edge := range edges {
 		if edge.Benefit-edge.Cost >= 0 {
 			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
