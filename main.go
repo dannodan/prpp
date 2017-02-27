@@ -24,6 +24,7 @@ func main() {
 	nodes := make(map[int]Node, 0)
 	pNodes := make(map[int]Node, 0)
 	sortedEdges := Edges{}
+	sortedPositiveEdges := Edges{}
 	// nodes[0] = g.MakeNode()
 	// nodes[1] = g.MakeNode()
 	// nodes[2] = g.MakeNode()
@@ -62,18 +63,24 @@ func main() {
 			endNode, _ := strconv.ParseInt(contents[1], 0, 0)
 			cost, _ := strconv.ParseInt(contents[2], 0, 0)
 			benefit, _ := strconv.ParseInt(contents[3], 0, 0)
-			newEdge := Edge{int(cost), int(benefit), pNodes[int(startNode)], pNodes[int(endNode)]}
+			newEdge := Edge{int(cost), int(benefit), nodes[int(startNode)], nodes[int(endNode)]}
+			newPositiveEdge := Edge{int(cost), int(benefit), pNodes[int(startNode)], pNodes[int(endNode)]}
 			// fmt.Println("Lel")
 			// fmt.Println(newEdge)
+			// fmt.Println(newPositiveEdge)
 			sortedEdges = append(sortedEdges, newEdge)
+			sortedPositiveEdges = append(sortedPositiveEdges, newPositiveEdge)
 		}
 		line++
 	}
-	// fmt.Println(nodes)
+
 	sort.Sort(sort.Reverse(sortedEdges))
+	sort.Sort(sort.Reverse(sortedPositiveEdges))
 	// fmt.Println(sortedEdges)
 	g.GraphBuilder(sortedEdges)
-	positiveG.PositiveGraphBuilder(sortedEdges)
+	positiveG.PositiveGraphBuilder(sortedPositiveEdges)
+	fmt.Println(g)
+	fmt.Println(positiveG)
 	// fmt.Println(positiveG)
 	// positiveG.ConnectedComponentsMap()
 	// positiveG.unseeNodes()
@@ -88,7 +95,7 @@ func main() {
 
 	// fmt.Println(positiveG.ConnectedComponents())
 
-	positiveG.unseeNodes()
+	// positiveG.unseeNodes()
 
 	// path := positiveG.GetPath(positiveG.nodes[0].container)
 
@@ -183,7 +190,7 @@ func main() {
 	// // positiveG.checkIncidence()
 	// // fmt.Println()
 	// // fmt.Println("Imprimiendo grafo positivo nuevo")
-	fmt.Println(positiveG)
+	// fmt.Println(positiveG)
 	// // eulerPath, _ := positiveG.EulerianCycle(nodes[1])
 	// // fmt.Println(eulerPath)
 	// // check(err)

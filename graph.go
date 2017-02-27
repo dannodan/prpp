@@ -369,6 +369,7 @@ func (g *Graph) LinkComponents(edges Edges) {
 }
 
 func (g *Graph) GraphBuilder(edges Edges) {
+	fmt.Println(edges)
 	for _, edge := range edges {
 		g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
 		edge.Start.node.incidence = edge.Start.node.incidence + 1
@@ -377,14 +378,13 @@ func (g *Graph) GraphBuilder(edges Edges) {
 }
 
 func (g *Graph) PositiveGraphBuilder(edges Edges) {
+	fmt.Println(edges)
 	for _, edge := range edges {
 		if edge.Benefit-edge.Cost >= 0 {
-			// fmt.Println(edge.Start)
 			g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
 			edge.Start.node.incidence = edge.Start.node.incidence + 1
 			edge.End.node.incidence = edge.End.node.incidence + 1
 		}
-		// fmt.Println(edge)
 	}
 }
 
