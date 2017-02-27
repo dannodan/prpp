@@ -82,18 +82,17 @@ func main() {
 	// sort.Reverse(sortedEdges)
 	// eulerPath, _ := g.EulerianCycle(nodes[1])
 	// fmt.Println(eulerPath)
-	// g.ConnectedComponentOfNode(nodes[1].node)
 	// g.ConnectedComponents()
-	fmt.Println(positiveG.nodes[0].container)
+	// fmt.Println(positiveG.nodes[0].container)
 	// check(err)
 
 	// fmt.Println(positiveG.ConnectedComponents())
 
 	positiveG.unseeNodes()
 
-	path := positiveG.GetPath(positiveG.nodes[0].container)
+	// path := positiveG.GetPath(positiveG.nodes[0].container)
 
-	fmt.Println(path)
+	// fmt.Println(path)
 	//
 	// // Get Floyd Warshall for the complete Graph
 	// minCost, minPath := positiveG.FloydWarshall()
@@ -184,7 +183,7 @@ func main() {
 	// // positiveG.checkIncidence()
 	// // fmt.Println()
 	// // fmt.Println("Imprimiendo grafo positivo nuevo")
-	// // fmt.Println(positiveG)
+	fmt.Println(positiveG)
 	// // eulerPath, _ := positiveG.EulerianCycle(nodes[1])
 	// // fmt.Println(eulerPath)
 	// // check(err)

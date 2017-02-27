@@ -344,6 +344,7 @@ func (g *Graph) ConnectedComponentOfNode(node *node) []Node {
 func (g *Graph) LinkComponents(edges Edges) {
 	// linkedComponents := make([]map[int]Node, 0)
 	linkedComponents := g.ConnectedComponentsMap()
+	g.unseeNodes()
 	// fmt.Println(g)
 	fmt.Println(linkedComponents)
 	for _, edge := range edges {
@@ -358,10 +359,13 @@ func (g *Graph) LinkComponents(edges Edges) {
 				// fmt.Println(second.node.index)
 				g.MakeEdge(edge.Start, edge.End, edge.Cost, edge.Benefit)
 				// fmt.Println("Nodo Agregado")
+				break
 			}
 		}
+		linkedComponents = g.ConnectedComponentsMap()
+		g.unseeNodes()
+		fmt.Println(g)
 	}
-	g.unseeNodes()
 }
 
 func (g *Graph) GraphBuilder(edges Edges) {
@@ -425,40 +429,41 @@ func (g *Graph) checkIncidence() {
 	// fmt.Println(totalNodes)
 }
 
-func (g *Graph) GetPath(fromNode Node) []int {
-	path := []int{}
-	edgeList := make(map[Node]map[Node]edge, 0)
-	for _, node := range g.nodes {
-		edgeList[node.container] = make(map[Node]edge, 0)
-		for _, edge := range node.edges {
-			edgeList[node.container][edge.end.container] = edge
-		}
-	}
-	chosenEdge := 0
-	costIndex := float64(0)
-	for index, edge := range fromNode.node.edges {
-		if (edgeList[fromNode][edge.end.container] > costIndex) && edge.state <= fromNode.node.edges[chosenEdge].state {
-			fmt.Println(edge.state)
-			costIndex = edgeList[fromNode][edge.end.container]
-			chosenEdge = index
-			// fmt.Println("test")
-			// fmt.Println(chosenEdge)
-		}
-	}
-
-	// fmt.Println(g.nodes[0])
-	fromNode.node.edges[chosenEdge].state++
-	fmt.Println(fromNode.node.edges[chosenEdge].state)
-	if fromNode.node.edges[chosenEdge].end == g.nodes[0] {
-		path = append(path, 1)
-		fmt.Println(path)
-	} else {
-		path = g.GetPath(fromNode.node.edges[chosenEdge].end.container)
-		path = append(path, fromNode.node.edges[chosenEdge].end.index)
-		fmt.Println(path)
-	}
-	return path
-}
+// func (g *Graph) GetPath(fromNode Node) []int {
+// 	path := []int{}
+// 	edgeList := make(map[Node]map[Node]edge, 0)
+// 	for _, node := range g.nodes {
+// 		edgeList[node.container] = make(map[Node]edge, 0)
+// 		for _, edge := range node.edges {
+// 			edgeList[node.container][edge.end.container] = edge
+// 		}
+// 	}
+// 	chosenEdge := 0
+// 	costIndex := float64(0)
+// 	for index, edge := range fromNode.node.edges {
+// 		test := float64(edgeList[fromNode][edge.end.container].benefit) / float64(edgeList[fromNode][edge.end.container].cost)
+// 		if (test > costIndex) && edge.state <= fromNode.node.edges[chosenEdge].state {
+// 			fmt.Println(edge.state)
+// 			costIndex = test
+// 			chosenEdge = index
+// 			// fmt.Println("test")
+// 			// fmt.Println(chosenEdge)
+// 		}
+// 	}
+// 	fmt.Println("test")
+// 	edgeList[fromNode][fromNode.node.edges[chosenEdge].end.container].state = edgeList[fromNode][fromNode.node.edges[chosenEdge].end.container].state + 1
+// 	// edgeList[fromNode][fromNode.node.edges[chosenEdge].end.container]
+// 	fmt.Println(fromNode.node.edges[chosenEdge].state)
+// 	if fromNode.node.edges[chosenEdge].end == g.nodes[0] {
+// 		path = append(path, 1)
+// 		fmt.Println(path)
+// 	} else {
+// 		path = g.GetPath(fromNode.node.edges[chosenEdge].end.container)
+// 		path = append(path, fromNode.node.edges[chosenEdge].end.index)
+// 		fmt.Println(path)
+// 	}
+// 	return path
+// }
 
 func (g *Graph) EulerianCycle(start Node) (tour []int, success bool) {
 	// For an Eulerian cirtuit all the vertices has to have a even degree
